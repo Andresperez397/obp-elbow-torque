@@ -2,7 +2,7 @@
 
 **What it is:** a pre-registered analysis of how much of a pitcher's peak elbow varus torque can be predicted from body size, velocity and mechanics. It also measures how badly the usual validation shortcut overstates the answer.
 
-**Data:** 411 fastballs from 100 pitchers in the [OpenBiomechanics Project](https://www.openbiomechanics.org) (Driveline Baseball). Torque comes from marker-based motion capture (360 Hz) with force plates (1,080 Hz), processed by inverse dynamics.
+**Data:** 411 fastballs from 100 pitchers in the [OpenBiomechanics Project](https://openbiomechanics.org) (Driveline Baseball). Torque comes from marker-based motion capture (360 Hz) with force plates (1,080 Hz), processed by inverse dynamics.
 
 **Author:** Andres Perez, M.S. Kinesiology (Biomechanics)
 
@@ -122,7 +122,7 @@ pytest -q
 - Aguinaldo AL, Chambers H. Correlation of throwing mechanics with elbow valgus load in adult baseball pitchers. *Am J Sports Med.* 2009;37(10):2043-2048. [doi:10.1177/0363546509336721](https://doi.org/10.1177/0363546509336721)
 - Fleisig GS, Andrews JR, Dillman CJ, Escamilla RF. Kinetics of baseball pitching with implications about injury mechanisms. *Am J Sports Med.* 1995;23(2):233-239. [doi:10.1177/036354659502300218](https://doi.org/10.1177/036354659502300218)
 - Solomito MJ, Garibay EJ, Woods JR, Õunpuu S, Nissen CW. Lateral trunk lean in pitchers affects both ball velocity and upper extremity joint moments. *Am J Sports Med.* 2015;43(5):1235-1240. [doi:10.1177/0363546515574060](https://doi.org/10.1177/0363546515574060)
-- Driveline Baseball. The OpenBiomechanics Project. https://www.openbiomechanics.org
+- Driveline Baseball. The OpenBiomechanics Project. https://openbiomechanics.org
 
 ## Licensing and attribution
 
