@@ -1,0 +1,16 @@
+{
+  "mean": {
+    "seed": 2.0,
+    "r2_tuned_gbm": 0.5499,
+    "r2_enet": 0.6319,
+    "rmse_tuned_gbm": 13.3453,
+    "rmse_enet": 12.0704
+  },
+  "enet_better_in": 5,
+  "n_repeats": 5,
+  "most_chosen_params": {
+    "{\"learning_rate\": 0.03, \"max_depth\": 2, \"max_iter\": 300, \"min_samples_leaf\": 30}": 16,
+    "{\"learning_rate\": 0.1, \"max_depth\": 2, \"max_iter\": 100, \"min_samples_leaf\": 30}": 11,
+    "{\"learning_rate\": 0.03, \"max_depth\": 2, \"max_iter\": 300, \"min_samples_leaf\": 10}": 6
+  }
+}

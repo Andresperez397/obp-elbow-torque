@@ -40,7 +40,7 @@ Under the pre-declared rule, a block of information counts as adding something o
 - If pitches are split at random, so a pitcher's other fastballs sit in the training set, gradient-boosted trees look like the best model (R² 0.87).
 - On new pitchers the same model reaches only R² 0.51, worse than a linear elastic net.
 - Under a random split, the trees can match a held-out pitch to that pitcher's other fastballs. That advantage disappears for a pitcher the model has never seen.
-- Leakage inflation is 0.04 to 0.16 for the linear models and 0.37 to 0.39 for the trees.
+- Leakage inflation is 0.04 to 0.09 for ordinary least squares, 0.10 to 0.16 for the elastic net, and 0.37 to 0.39 for the trees. The elastic net still tunes its penalty with pitcher-grouped inner folds under the random split, so its inflation is a lower bound.
 
 **4. Velocity costs about 1.3 Nm per mph, within and between pitchers.**
 - Adjusted for body size and handedness, a pitcher who throws 1 mph harder than another carries 1.29 Nm more torque (CI 0.68–1.91).
@@ -81,13 +81,17 @@ The table below comes from 500 pitcher-bootstrap refits of the all-kinematics mo
 - Next come glove-arm and throwing-arm shoulder abduction at foot plant, and trunk lateral tilt.
 - See [`reports/tables/exploratory_enet_coefficients.csv`](reports/tables/exploratory_enet_coefficients.csv).
 
+### Exploratory (not pre-registered): are the trees just untuned?
+
+The pre-specified trees used fixed settings, while the elastic net was tuned, so I also tuned the trees (depth, learning rate, rounds, leaf size) with pitcher-grouped inner folds, on the same outer folds (5 repeats). Tuning helps the trees, from R² 0.51 to 0.55, but the elastic net still wins in all 5 repeats (0.63). See [`reports/tables/exploratory_tuned_gbm_summary.json`](reports/tables/exploratory_tuned_gbm_summary.json).
+
 ## Repository layout
 
 ```
 ANALYSIS_PLAN.md      questions, models and decision rules, frozen before modeling
 DEVIATIONS.md         every post-plan change, dated, with its reason
 src/obp_evt/          data loading and predictor blocks, models and grouped CV, mixed models and bootstrap
-scripts/              fetch_data, run_analysis, make_figures, exploratory_coefficients
+scripts/              fetch_data, run_analysis, make_figures, exploratory_coefficients, exploratory_tuned_gbm
 tests/                unit tests (pytest)
 reports/              tables, figures, two-page summary (HTML and PDF)
 ```
@@ -109,6 +113,7 @@ python scripts/fetch_data.py          # downloads the OBP files (not redistribut
 python scripts/run_analysis.py        # about 5 minutes; writes reports/tables/
 python scripts/make_figures.py
 python scripts/exploratory_coefficients.py   # optional
+python scripts/exploratory_tuned_gbm.py      # optional, about 20 min
 pytest -q
 ```
 

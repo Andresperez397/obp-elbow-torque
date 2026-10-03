@@ -33,3 +33,10 @@ The M3 variable list is unchanged. Shoulder abduction at foot plant stays in as 
 - **2026-10-02:** added tests: held-out pitcher corruption for every learner, out-of-fold mean, whole-pitcher bootstrap.
 - **2026-10-02:** added the ruff config.
 - Re-running the analysis reproduced every table byte for byte.
+
+## D4 (2026-10-03): added an exploratory check with tuned boosted trees
+
+- **Why:** the elastic net was tuned by inner grouped CV, but the boosted trees used fixed settings, so "trees do worse" could just reflect tuning. A fair comparison tunes both.
+- **What:** `scripts/exploratory_tuned_gbm.py` uses the same outer folds (repeats 0–4) and M4 features. It tunes the trees over a 16-setting grid with an inner 5-fold GroupKFold on training pitchers only.
+- **Result:** tuned trees reach R² 0.550 (RMSE 13.3 Nm), against 0.632 (12.1 Nm) for the elastic net, which is better in 5 of 5 repeats. The elastic-net values reproduce the main run on the same splits.
+- **Status:** exploratory and labelled as such. The pre-specified results are unchanged.
