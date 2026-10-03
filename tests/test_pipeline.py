@@ -119,3 +119,11 @@ def test_cluster_bootstrap_resamples_whole_pitchers():
 
     out = stats.cluster_bootstrap(df, "g", whole_blocks, n_boot=300, seed=0)
     assert out["ok"].all()
+
+
+def test_gbm_settings_are_the_planned_fixed_ones():
+    hgb = models.make_model("gbm").steps[-1][1]
+    params = hgb.get_params()
+    assert params["early_stopping"] is False  # no silent internal (non-grouped) validation split
+    assert (params["max_depth"], params["learning_rate"], params["max_iter"],
+            params["min_samples_leaf"]) == (3, 0.05, 300, 20)

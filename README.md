@@ -28,13 +28,13 @@ Body size and velocity explain 45% of the variance. Adding the full set of kinem
 | All kinematics (gradient-boosted trees) | 0.51 | 0.36–0.61 | 14.0 |
 | + lower-body kinetics and ground reaction forces (elastic net) | 0.63 | 0.50–0.72 | 12.1 |
 
-R² and RMSE are averages over 20 repeats of 10-fold grouped CV. The 95% CIs come from a pitcher bootstrap of the first repeat (see Methods). At the pitcher level (each pitcher's mean torque against the mean prediction), the best model reaches R² 0.66.
+R² and RMSE are averages over 20 repeats of 10-fold grouped CV. The 95% CIs come from a pitcher bootstrap of the first repeat (see *How the analysis was done*). At the pitcher level (each pitcher's mean torque against the mean prediction), the best model reaches R² 0.66.
 
 Under the pre-declared rule, a block of information counts as adding something only if the 95% interval of its R² gain excludes zero:
-- Velocity adds information over body size (+0.10).
-- The full kinematic set adds information (+0.19 over velocity, +0.12 over the literature subset).
+- Velocity adds information over body size (+0.10, CI 0.02 to 0.20).
+- The full kinematic set adds information: +0.19 over velocity (CI 0.10 to 0.30) and +0.12 over the literature subset (CI 0.04 to 0.22).
 - The 10 literature mechanics on their own do not clear the bar (+0.08, CI −0.05 to 0.19).
-- Lower-body kinetics and ground reaction forces add nothing on top of kinematics.
+- Lower-body kinetics and ground reaction forces add nothing on top of kinematics (−0.00, CI −0.08 to 0.06).
 
 **3. Leaky validation inflates the result and reverses the model ranking.**
 - If pitches are split at random, so a pitcher's other fastballs sit in the training set, gradient-boosted trees look like the best model (R² 0.87).
@@ -64,7 +64,7 @@ Under the pre-declared rule, a block of information counts as adding something o
 - **Grouped validation.** 10-fold cross-validation by pitcher, repeated 20 times. All preprocessing (winsorizing, imputation, scaling) and elastic-net tuning (inner grouped CV) is fit inside the training folds.
 - **Honest uncertainty.** 95% intervals come from 2,000 bootstrap resamples of pitchers (not pitches), applied to the out-of-fold predictions of the first repeat. The predictions are held fixed, so the intervals show how much the result depends on which pitchers were sampled. Repeat-to-repeat variation is small by comparison (SD of R² ≤ 0.03 across the 20 repeats).
 - **Mixed models.** A random-intercept model gives the ICC, with a parametric-bootstrap CI. A within/between decomposition separates the two velocity effects.
-- **Tests (14).** `tests/` checks:
+- **Tests (15).** `tests/` checks:
   - the join keeps every pitch
   - no outcome or leakage column enters any block, and the blocks are nested
   - grouped folds never share a pitcher
@@ -72,6 +72,7 @@ Under the pre-declared rule, a block of information counts as adding something o
   - preprocessing uses training data only
   - the bootstrap resamples whole pitchers
   - the ICC estimator recovers a known value in simulation
+  - the boosted trees run with the planned fixed settings (no hidden early stopping)
 
 ### Exploratory (not pre-registered): what the elastic net relies on
 
@@ -79,6 +80,17 @@ The table below comes from 500 pitcher-bootstrap refits of the all-kinematics mo
 - The most stable predictors, holding the model's other inputs fixed, are body mass, velocity, and *lower* peak shoulder external rotation (layback).
 - Next come glove-arm and throwing-arm shoulder abduction at foot plant, and trunk lateral tilt.
 - See [`reports/tables/exploratory_enet_coefficients.csv`](reports/tables/exploratory_enet_coefficients.csv).
+
+## Repository layout
+
+```
+ANALYSIS_PLAN.md      questions, models and decision rules, frozen before modeling
+DEVIATIONS.md         every post-plan change, dated, with its reason
+src/obp_evt/          data loading and predictor blocks, models and grouped CV, mixed models and bootstrap
+scripts/              fetch_data, run_analysis, make_figures, exploratory_coefficients
+tests/                unit tests (pytest)
+reports/              tables, figures, two-page summary (HTML and PDF)
+```
 
 ## Limitations
 

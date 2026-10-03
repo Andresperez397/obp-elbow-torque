@@ -61,7 +61,7 @@ def make_model(kind: str):
         return make_pipeline(SimpleImputer(strategy="median"),
                              HistGradientBoostingRegressor(max_depth=3, learning_rate=0.05,
                                                            max_iter=300, min_samples_leaf=20,
-                                                           random_state=0))
+                                                           early_stopping=False, random_state=0))
     raise ValueError(f"unknown model kind: {kind}")
 
 
