@@ -1,0 +1,107 @@
+Q1 ICC
+Q2/Q3 cross-validation
+  group repeat 1/20
+  group repeat 2/20
+  group repeat 3/20
+  group repeat 4/20
+  group repeat 5/20
+  group repeat 6/20
+  group repeat 7/20
+  group repeat 8/20
+  group repeat 9/20
+  group repeat 10/20
+  group repeat 11/20
+  group repeat 12/20
+  group repeat 13/20
+  group repeat 14/20
+  group repeat 15/20
+  group repeat 16/20
+  group repeat 17/20
+  group repeat 18/20
+  group repeat 19/20
+  group repeat 20/20
+  random repeat 1/20
+  random repeat 2/20
+  random repeat 3/20
+  random repeat 4/20
+  random repeat 5/20
+  random repeat 6/20
+  random repeat 7/20
+  random repeat 8/20
+  random repeat 9/20
+  random repeat 10/20
+  random repeat 11/20
+  random repeat 12/20
+  random repeat 13/20
+  random repeat 14/20
+  random repeat 15/20
+  random repeat 16/20
+  random repeat 17/20
+  random repeat 18/20
+  random repeat 19/20
+  random repeat 20/20
+Q4 within/between
+Q5 normalization
+{
+  "n_pitches": 411,
+  "n_pitchers": 100,
+  "block_sizes": {
+    "M1": 3,
+    "M2": 4,
+    "M3": 14,
+    "M4": 46,
+    "M5": 71
+  },
+  "levels": {
+    "college": 75,
+    "independent": 12,
+    "high_school": 7,
+    "milb": 6
+  },
+  "lefty_pitchers": 22,
+  "q1_icc": {
+    "icc": 0.9501445273082445,
+    "ci_low": 0.9324834065345988,
+    "ci_high": 0.9623591904759307,
+    "tau_nm": 19.23355222651866,
+    "sigma_nm": 4.405762525628403,
+    "n_boot_ok": 1000
+  },
+  "q4_within_speed_sd_mph": 0.5356699323489837,
+  "q5_normalization": {
+    "intercept_nm": 20.599383482918924,
+    "intercept_ci": [
+      -1.762827071065285,
+      42.961594036903136
+    ],
+    "slope": 0.05526804478951933,
+    "r2": 0.4053954692765782,
+    "corr_normalized_vs_bwh": -0.1532720892656989,
+    "n_pitchers": 100
+  },
+  "runtime_s": 261.4
+}
+                             model  rmse_grouped  r2_grouped  r2_seed0  r2_ci_low  r2_ci_high  rmse_ci_low  rmse_ci_high  r2_pitcher_level  rmse_random  r2_random  leakage_inflation_r2
+0                          M0 mean        19.856       0.000     0.000      0.000       0.000       16.548        23.406             0.000       19.687      0.000                 0.000
+1                     M1 body size        15.997       0.351     0.342      0.115       0.501       13.266        19.141             0.377       15.352      0.392                 0.041
+2                    M2 + velocity        14.792       0.445     0.440      0.272       0.570       12.399        17.733             0.470       14.167      0.482                 0.037
+3        M3 + literature mechanics        13.573       0.533     0.517      0.361       0.625       11.691        16.020             0.551       12.151      0.619                 0.086
+4         M4 all kinematics (enet)        12.039       0.632     0.633      0.523       0.715       10.057        14.320             0.664       10.127      0.735                 0.103
+5          M4 all kinematics (gbm)        13.956       0.506     0.507      0.358       0.614       11.783        16.284             0.539        7.015      0.873                 0.367
+6  M5 + lower-body kinetics (enet)        12.077       0.630     0.631      0.502       0.721       10.256        13.716             0.664        8.971      0.792                 0.162
+7   M5 + lower-body kinetics (gbm)        14.230       0.486     0.488      0.337       0.592       12.034        16.630             0.522        6.995      0.874                 0.388
+                                comparison  gain_r2  ci_low  ci_high  adds_information
+0                      body size over mean    0.342   0.115    0.501              True
+1                  velocity over body size    0.099   0.018    0.195              True
+2       literature mechanics over velocity    0.076  -0.046    0.189             False
+3      all kinematics (enet) over velocity    0.193   0.105    0.296              True
+4    all kinematics (enet) over literature    0.117   0.036    0.221              True
+5       all kinematics (gbm) over velocity    0.067  -0.041    0.165             False
+6  lower-body kinetics (enet) over M4 enet   -0.002  -0.076    0.055             False
+7    lower-body kinetics (gbm) over M4 gbm   -0.019  -0.064    0.024             False
+            term  estimate  ci_low  ci_high      p
+0  speed_between     1.294   0.676    1.911  0.000
+1   speed_within     1.247   0.462    2.032  0.002
+2        mass_kg     1.088   0.782    1.393  0.000
+3       height_m    -2.641 -45.068   39.787  0.903
+4          lefty     0.113  -6.640    6.866  0.974

@@ -1,0 +1,39 @@
+{
+  "n_pitches": 411,
+  "n_pitchers": 100,
+  "block_sizes": {
+    "M1": 3,
+    "M2": 4,
+    "M3": 14,
+    "M4": 46,
+    "M5": 71
+  },
+  "levels": {
+    "college": 75,
+    "independent": 12,
+    "high_school": 7,
+    "milb": 6
+  },
+  "lefty_pitchers": 22,
+  "q1_icc": {
+    "icc": 0.9501445273082445,
+    "ci_low": 0.9324834065345988,
+    "ci_high": 0.9623591904759307,
+    "tau_nm": 19.23355222651866,
+    "sigma_nm": 4.405762525628403,
+    "n_boot_ok": 1000
+  },
+  "q4_within_speed_sd_mph": 0.5356699323489837,
+  "q5_normalization": {
+    "intercept_nm": 20.599383482918924,
+    "intercept_ci": [
+      -1.762827071065285,
+      42.961594036903136
+    ],
+    "slope": 0.05526804478951933,
+    "r2": 0.4053954692765782,
+    "corr_normalized_vs_bwh": -0.1532720892656989,
+    "n_pitchers": 100
+  },
+  "runtime_s": 261.4
+}
