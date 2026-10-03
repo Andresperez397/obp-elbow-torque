@@ -37,7 +37,8 @@ GAINS = [  # (label, model, reference)
     ("all kinematics (enet) over velocity", "M4 all kinematics (enet)", "M2 + velocity"),
     ("all kinematics (enet) over literature", "M4 all kinematics (enet)", "M3 + literature mechanics"),
     ("all kinematics (gbm) over velocity", "M4 all kinematics (gbm)", "M2 + velocity"),
-    ("lower-body kinetics (enet) over M4 enet", "M5 + lower-body kinetics (enet)", "M4 all kinematics (enet)"),
+    ("lower-body kinetics (enet) over M4 enet", "M5 + lower-body kinetics (enet)",
+     "M4 all kinematics (enet)"),
     ("lower-body kinetics (gbm) over M4 gbm", "M5 + lower-body kinetics (gbm)", "M4 all kinematics (gbm)"),
 ]
 
@@ -68,7 +69,8 @@ def main() -> None:
     blocks = data.blocks(df)
     results: dict = {"n_pitches": len(df), "n_pitchers": int(df[data.GROUP].nunique()),
                      "block_sizes": {k: len(v) for k, v in blocks.items()}}
-    json.dump(blocks, open(OUT / "feature_blocks.json", "w"), indent=2)
+    with open(OUT / "feature_blocks.json", "w") as f:
+        json.dump(blocks, f, indent=2)
 
     cohort = df.groupby(data.GROUP).agg(level=("playing_level", "first"), lefty=("lefty", "first"),
                                         mass=("mass_kg", "first"), height=("height_m", "first"),
@@ -84,13 +86,14 @@ def main() -> None:
 
     print("Q2/Q3 cross-validation")
     grouped, oof = run_scheme(df, blocks, "group")
-    random, _ = run_scheme(df, blocks, "random")
-    cv = pd.concat([grouped, random])
+    random_cv, _ = run_scheme(df, blocks, "random")
+    cv = pd.concat([grouped, random_cv])
     cv.to_csv(OUT / "cv_repeats.csv", index=False)
     summ = cv.groupby(["scheme", "model"], sort=False)[["rmse", "r2"]].agg(["mean", "std"])
     summ.to_csv(OUT / "cv_summary.csv")
 
-    # Pitcher-cluster bootstrap on the seed-0 grouped out-of-fold predictions.
+    # Pitcher-cluster bootstrap on the seed-0 grouped out-of-fold predictions. Predictions are
+    # held fixed, so the interval reflects which pitchers were sampled, not refit variability.
     y = df[data.OUTCOME].to_numpy()
     boot_df = pd.DataFrame({"g": df[data.GROUP].to_numpy(), "y": y,
                             **{k: v for k, v in oof.items()}})
@@ -107,7 +110,7 @@ def main() -> None:
     model_rows = []
     for label, _, _ in SPECS:
         g_mean = grouped[grouped.model == label][["rmse", "r2"]].mean()
-        r_mean = random[random.model == label][["rmse", "r2"]].mean()
+        r_mean = random_cv[random_cv.model == label][["rmse", "r2"]].mean()
         pm = boot_df.groupby("g")[list(dict.fromkeys(["y", label, "M0 mean"]))].mean()
         model_rows.append({
             "model": label,
@@ -145,7 +148,8 @@ def main() -> None:
     results["q5_normalization"] = nt
 
     results["runtime_s"] = round(time.time() - t0, 1)
-    json.dump(results, open(OUT / "results.json", "w"), indent=2, default=float)
+    with open(OUT / "results.json", "w") as f:
+        json.dump(results, f, indent=2, default=float)
     print(json.dumps(results, indent=2, default=float))
     print(model_table.round(3).to_string())
     print(pd.DataFrame(gain_rows).round(3).to_string())

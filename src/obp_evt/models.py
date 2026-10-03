@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from sklearn.base import BaseEstimator, TransformerMixin, clone
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.impute import SimpleImputer
@@ -46,32 +46,32 @@ class InnerGroupElasticNet(BaseEstimator):
         return self.model_.predict(X)
 
 
-def _prep():
-    return [SimpleImputer(strategy="median"), Winsorizer(), StandardScaler()]
+def preprocessing():
+    """Per-fold preprocessing for the linear models: impute, winsorize, standardize."""
+    return make_pipeline(SimpleImputer(strategy="median"), Winsorizer(), StandardScaler())
 
 
 def make_model(kind: str):
+    """Learners that need only (X, y). The grouped elastic net is built in fit_predict."""
     if kind == "mean":
         return DummyRegressor(strategy="mean")
     if kind == "ols":
-        return make_pipeline(*_prep(), LinearRegression())
+        return make_pipeline(preprocessing(), LinearRegression())
     if kind == "gbm":
         return make_pipeline(SimpleImputer(strategy="median"),
                              HistGradientBoostingRegressor(max_depth=3, learning_rate=0.05,
                                                            max_iter=300, min_samples_leaf=20,
                                                            random_state=0))
-    if kind == "enet":
-        return "enet"  # needs groups at fit time; handled in fit_predict
-    raise ValueError(kind)
+    raise ValueError(f"unknown model kind: {kind}")
 
 
-def fit_predict(kind: str, X_tr, y_tr, g_tr, X_te):
+def fit_predict(kind: str, X_tr, y_tr, g_tr, X_te) -> np.ndarray:
+    """Fit on the training fold only and predict the held-out fold."""
     if kind == "enet":
-        prep = make_pipeline(*_prep()).fit(X_tr)
+        prep = preprocessing().fit(X_tr)
         net = InnerGroupElasticNet().fit(prep.transform(X_tr), y_tr, g_tr)
         return net.predict(prep.transform(X_te))
-    model = clone(make_model(kind)).fit(X_tr, y_tr)
-    return model.predict(X_te)
+    return make_model(kind).fit(X_tr, y_tr).predict(X_te)
 
 
 def shuffled_group_folds(groups: np.ndarray, n_splits: int, seed: int):

@@ -77,9 +77,13 @@ Q5 normalization
     "slope": 0.05526804478951933,
     "r2": 0.4053954692765782,
     "corr_normalized_vs_bwh": -0.1532720892656989,
+    "corr_ci": [
+      -0.33947354762750576,
+      0.044488925706135496
+    ],
     "n_pitchers": 100
   },
-  "runtime_s": 261.4
+  "runtime_s": 296.2
 }
                              model  rmse_grouped  r2_grouped  r2_seed0  r2_ci_low  r2_ci_high  rmse_ci_low  rmse_ci_high  r2_pitcher_level  rmse_random  r2_random  leakage_inflation_r2
 0                          M0 mean        19.856       0.000     0.000      0.000       0.000       16.548        23.406             0.000       19.687      0.000                 0.000

@@ -2,7 +2,7 @@
 
 **What it is:** a pre-registered analysis of how much of a pitcher's peak elbow varus torque can be predicted from body size, velocity and mechanics. It also measures how badly the usual validation shortcut overstates the answer.
 
-**Data:** 411 fastballs from 100 pitchers in the [OpenBiomechanics Project](https://www.openbiomechanics.org) (Driveline Baseball). Torque comes from marker-based lab motion capture and inverse dynamics.
+**Data:** 411 fastballs from 100 pitchers in the [OpenBiomechanics Project](https://www.openbiomechanics.org) (Driveline Baseball). Torque comes from marker-based motion capture (360 Hz) with force plates (1,080 Hz), processed by inverse dynamics.
 
 **Author:** Andres Perez, M.S. Kinesiology (Biomechanics)
 
@@ -12,10 +12,12 @@
 
 **1. Torque is a pitcher trait.**
 - 95% of the variance in elbow varus torque lies between pitchers (ICC 0.95, 95% CI 0.93–0.96).
-- A pitcher's fastballs differ from one another by about 4 Nm. Pitchers differ from each other by about 19 Nm.
+- Fastball to fastball, one pitcher's torque varies by a standard deviation of about 4 Nm. Between pitchers the standard deviation is about 19 Nm.
 - So the useful prediction target is the *pitcher*, and validation has to hold out whole pitchers.
 
-**2. On pitchers the model has never seen, mechanics roughly double what body size explains.**
+**2. On pitchers the model has never seen, adding mechanics raises explained variance from 0.45 to 0.63.**
+
+Body size and velocity explain 45% of the variance. Adding the full set of kinematic measures (no kinetics) reaches 63%.
 
 | Model (validated on held-out pitchers) | R² | 95% CI | RMSE (Nm) |
 |---|---|---|---|
@@ -26,6 +28,8 @@
 | All kinematics (gradient-boosted trees) | 0.51 | 0.36–0.61 | 14.0 |
 | + lower-body kinetics and ground reaction forces (elastic net) | 0.63 | 0.50–0.72 | 12.1 |
 
+R² and RMSE are averages over 20 repeats of 10-fold grouped CV. The 95% CIs come from a pitcher bootstrap of the first repeat (see Methods). At the pitcher level (each pitcher's mean torque against the mean prediction), the best model reaches R² 0.66.
+
 Under the pre-declared rule, a block of information counts as adding something only if the 95% interval of its R² gain excludes zero:
 - Velocity adds information over body size (+0.10).
 - The full kinematic set adds information (+0.19 over velocity, +0.12 over the literature subset).
@@ -35,7 +39,7 @@ Under the pre-declared rule, a block of information counts as adding something o
 **3. Leaky validation inflates the result and reverses the model ranking.**
 - If pitches are split at random, so a pitcher's other fastballs sit in the training set, gradient-boosted trees look like the best model (R² 0.87).
 - On new pitchers the same model reaches only R² 0.51, worse than a linear elastic net.
-- The trees were memorizing pitchers, not learning mechanics.
+- Under a random split, the trees can match a held-out pitch to that pitcher's other fastballs. That advantage disappears for a pitcher the model has never seen.
 - Leakage inflation is 0.04 to 0.16 for the linear models and 0.37 to 0.39 for the trees.
 
 **4. Velocity costs about 1.3 Nm per mph, within and between pitchers.**
@@ -48,8 +52,8 @@ Under the pre-declared rule, a block of information counts as adding something o
 **5. Ratio normalization (torque ÷ body weight × height) is not rejected in this sample.**
 - Pitcher-mean torque against BW×H has an intercept of 21 Nm (95% CI −2 to 43).
 - The interval includes zero, which proportional scaling requires, but only barely.
-- Normalized torque is still weakly negatively correlated with BW×H (r = −0.15).
-- So normalization over-corrects slightly for bigger pitchers. That is worth checking in any dataset before normalizing.
+- Normalized torque is weakly and not significantly correlated with BW×H (r = −0.15, 95% CI −0.34 to 0.04).
+- So normalization is defensible here. The intercept test is cheap and worth running on any dataset before normalizing.
 
 ![Normalization](reports/figures/fig4_normalization.png)
 
@@ -58,29 +62,33 @@ Under the pre-declared rule, a block of information counts as adding something o
 - **The plan came first.** [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) fixed the questions, predictor blocks, models, metrics and decision rules. It was committed to git before any outcome model was fit, and the commit history shows the order. Post-hoc changes are logged in [`DEVIATIONS.md`](DEVIATIONS.md).
 - **No leakage predictors.** Shoulder internal-rotation moment and the throwing-arm energy-flow terms come from the same inverse-dynamics solution as the outcome, so they are excluded.
 - **Grouped validation.** 10-fold cross-validation by pitcher, repeated 20 times. All preprocessing (winsorizing, imputation, scaling) and elastic-net tuning (inner grouped CV) is fit inside the training folds.
-- **Honest uncertainty.** 95% intervals come from a 2,000-resample bootstrap over pitchers, not pitches.
+- **Honest uncertainty.** 95% intervals come from 2,000 bootstrap resamples of pitchers (not pitches), applied to the out-of-fold predictions of the first repeat. The predictions are held fixed, so the intervals show how much the result depends on which pitchers were sampled. Repeat-to-repeat variation is small by comparison (SD of R² ≤ 0.03 across the 20 repeats).
 - **Mixed models.** A random-intercept model gives the ICC, with a parametric-bootstrap CI. A within/between decomposition separates the two velocity effects.
-- **Tests.** `tests/` checks:
+- **Tests (14).** `tests/` checks:
   - the join keeps every pitch
-  - no outcome or leakage column enters any block
+  - no outcome or leakage column enters any block, and the blocks are nested
   - grouped folds never share a pitcher
-  - preprocessing uses only training data
+  - corrupting a held-out pitcher's torque can't change that pitcher's own prediction, for every learner
+  - preprocessing uses training data only
+  - the bootstrap resamples whole pitchers
   - the ICC estimator recovers a known value in simulation
 
 ### Exploratory (not pre-registered): what the elastic net relies on
 
 The table below comes from 500 pitcher-bootstrap refits of the all-kinematics model, using standardized predictors. It describes what the model leans on, not causal effects.
-- The most stable predictors are body mass, velocity, and *lower* peak shoulder external rotation (layback) at a given velocity.
+- The most stable predictors, holding the model's other inputs fixed, are body mass, velocity, and *lower* peak shoulder external rotation (layback).
 - Next come glove-arm and throwing-arm shoulder abduction at foot plant, and trunk lateral tilt.
 - See [`reports/tables/exploratory_enet_coefficients.csv`](reports/tables/exploratory_enet_coefficients.csv).
 
 ## Limitations
 
-- **Sample:** 100 mostly college pitchers (75 college, 12 independent, 7 high school, 6 MiLB) from one private training facility, one lab session each, fastballs only. Do not assume the results transfer to MLB or in-game data.
+- **Sample:** 100 mostly college pitchers (75 college, 12 independent, 7 high school, 6 MiLB), all tested in Driveline's lab, one session each, fastballs only. Do not assume the results transfer to MLB or in-game data.
 - **The outcome is modeled:** torque is an inverse-dynamics estimate. Its level depends on a segment-inertia model that scales with body mass, so part of the body-size effect is built in by construction.
-- **Small sample:** with 100 pitchers, R² gains below about 0.05 can't be reliably separated from zero. Treat the confidence intervals as the result.
+- **Small sample:** with 100 pitchers, the 95% intervals for R² gains span about ±0.1. That's why the literature subset's +0.08 doesn't count as a finding. Treat the confidence intervals as the result.
 
 ## Reproduce
+
+Requires Python 3.11 or newer.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -91,6 +99,13 @@ python scripts/make_figures.py
 python scripts/exploratory_coefficients.py   # optional
 pytest -q
 ```
+
+## References
+
+- Aguinaldo AL, Chambers H. Correlation of throwing mechanics with elbow valgus load in adult baseball pitchers. *Am J Sports Med.* 2009;37(10):2043-2048. [doi:10.1177/0363546509336721](https://doi.org/10.1177/0363546509336721)
+- Fleisig GS, Andrews JR, Dillman CJ, Escamilla RF. Kinetics of baseball pitching with implications about injury mechanisms. *Am J Sports Med.* 1995;23(2):233-239. [doi:10.1177/036354659502300218](https://doi.org/10.1177/036354659502300218)
+- Solomito MJ, Garibay EJ, Woods JR, Õunpuu S, Nissen CW. Lateral trunk lean in pitchers affects both ball velocity and upper extremity joint moments. *Am J Sports Med.* 2015;43(5):1235-1240. [doi:10.1177/0363546515574060](https://doi.org/10.1177/0363546515574060)
+- Driveline Baseball. The OpenBiomechanics Project. https://www.openbiomechanics.org
 
 ## Licensing and attribution
 

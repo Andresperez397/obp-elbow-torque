@@ -1,0 +1,13 @@
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# Scripts and tests add src/ to sys.path before importing the package.
+"scripts/*" = ["E402"]
+"tests/*" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

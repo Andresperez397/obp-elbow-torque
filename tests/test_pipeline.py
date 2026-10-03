@@ -79,3 +79,43 @@ def test_icc_recovers_known_value():
     est = stats.icc(pd.DataFrame({"y": y, "g": g}), "y", "g", n_boot=100)
     assert est["ci_low"] < realized < est["ci_high"]
     assert est["icc"] == pytest.approx(realized, abs=0.03)
+
+
+def test_oof_mean_model_uses_only_training_folds():
+    """The M0 prediction for each held-out pitcher must equal the mean of the OTHER folds."""
+    rng = np.random.default_rng(0)
+    g = np.repeat(np.arange(20), 3)
+    df = pd.DataFrame({"y": rng.normal(100, 10, len(g)), "g": g})
+    pred = models.oof_predictions(df, [], "mean", "y", "g", seed=1, n_splits=5)
+    for tr, te in models.shuffled_group_folds(g, 5, seed=1):
+        assert np.allclose(pred[te], df["y"].iloc[tr].mean())
+
+
+@pytest.mark.parametrize("kind", ["ols", "enet", "gbm"])
+def test_held_out_pitcher_outcome_cannot_affect_its_own_prediction(kind):
+    """Corrupt one pitcher's torque; that pitcher's out-of-fold predictions must not move."""
+    rng = np.random.default_rng(2)
+    g = np.repeat(np.arange(40), 3)
+    X = rng.normal(size=(len(g), 4))
+    y = X @ np.array([3.0, -2.0, 0.0, 1.0]) + rng.normal(0, 1, len(g))
+    df = pd.DataFrame(X, columns=list("abcd")).assign(y=y, g=g)
+    before = models.oof_predictions(df, list("abcd"), kind, "y", "g", seed=0, n_splits=5)
+    bad = df.copy()
+    bad.loc[bad["g"] == 7, "y"] = 1e6
+    after = models.oof_predictions(bad, list("abcd"), kind, "y", "g", seed=0, n_splits=5)
+    rows = (df["g"] == 7).to_numpy()
+    assert np.allclose(before[rows], after[rows])
+    assert not np.allclose(before[~rows], after[~rows])  # sanity: the corruption is seen elsewhere
+
+
+def test_cluster_bootstrap_resamples_whole_pitchers():
+    """Within every resample, each pitcher contributes all of its rows or none, possibly repeated."""
+    sizes = {1: 1, 2: 2, 3: 3, 4: 5}
+    df = pd.DataFrame({"g": np.repeat(list(sizes), list(sizes.values()))})
+
+    def whole_blocks(sub):
+        counts = sub["g"].value_counts()
+        return {"ok": all(counts[k] % sizes[k] == 0 for k in counts.index), "n_g": len(sub)}
+
+    out = stats.cluster_bootstrap(df, "g", whole_blocks, n_boot=300, seed=0)
+    assert out["ok"].all()

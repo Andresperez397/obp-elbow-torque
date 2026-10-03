@@ -29,20 +29,20 @@
 <div class="grid">
 <div>
 <h2>Data</h2>
-<p>411 fastballs from 100 pitchers in the OpenBiomechanics Project (Driveline Baseball): lab motion capture with inverse dynamics. The pitchers are mostly college level, with one session each. The outcome is peak elbow varus torque (Nm).</p>
+<p>411 fastballs from 100 pitchers in the OpenBiomechanics Project (Driveline Baseball): marker-based motion capture (360 Hz) and force plates, processed by inverse dynamics. The pitchers are mostly college level, with one session each. The outcome is peak elbow varus torque (Nm).</p>
 <h2>Approach</h2>
 <ul>
 <li><b>Pre-registered:</b> the questions, models and decision rules were committed to git before any model was fit.</li>
 <li><b>No leakage:</b> predictors from the same arm inverse-dynamics solution were excluded.</li>
 <li><b>Grouped validation:</b> by pitcher, 10 folds × 20 repeats; all preprocessing done inside folds.</li>
-<li><b>Uncertainty:</b> pitcher-level bootstrap CIs; mixed models for the variance split and velocity effects.</li>
+<li><b>Uncertainty:</b> pitcher-level bootstrap CIs; mixed models for the variance split and velocity effects; 14 unit tests, including leakage checks.</li>
 </ul>
 </div>
 <div>
 <h2>Findings</h2>
 <ul>
 <li><b>Torque is a pitcher trait:</b> 95% of the variance lies between pitchers (ICC 0.95).</li>
-<li><b>Mechanics matter:</b> on unseen pitchers, all kinematics explain R² 0.63 (CI 0.52–0.72), against 0.35 for body size alone.</li>
+<li><b>Mechanics add real information:</b> on unseen pitchers, explained variance rises from R² 0.45 (body size + velocity) to 0.63 (CI 0.52–0.72) with the full kinematic set.</li>
 <li><b>Lower-body kinetics and ground reaction forces add nothing</b> beyond kinematics.</li>
 <li><b>Leaky validation misleads:</b> random pitch splits made boosted trees look best (R² 0.87). On new pitchers they reach 0.51, below the linear model.</li>
 <li><b>Velocity cost:</b> about 1.3 Nm per mph, both between and within pitchers.</li>
@@ -50,7 +50,7 @@
 </div>
 </div>
 
-<img src="figures/fig1_model_ladder.png" alt="Model ladder">
+<img src="figures/fig1_model_ladder.png" alt="Model ladder" style="width:86%;margin:0 auto">
 <p class="cap">Out-of-sample R² for each information block. Filled: validated on held-out pitchers, with 95% CI. Hollow: the same model under a random pitch split.</p>
 
 <div class="pb"></div>
@@ -64,14 +64,15 @@
 <tr><td>All kinematics, boosted trees</td><td class="n">0.51</td><td class="n">0.36–0.61</td><td class="n">14.0</td><td class="n">0.87</td></tr>
 <tr><td>+ lower-body kinetics, elastic net</td><td class="n">0.63</td><td class="n">0.50–0.72</td><td class="n">12.1</td><td class="n">0.79</td></tr>
 </table>
+<p class="cap">R² and RMSE: averages over 20 repeats of 10-fold CV grouped by pitcher. CIs: pitcher bootstrap (2,000 resamples) of the first repeat.</p>
 
 <div class="grid">
 <div><img src="figures/fig3_observed_vs_predicted.png" alt="Observed vs predicted"><p class="cap">Pitcher-mean torque against the prediction for pitchers held out of training.</p></div>
-<div><img src="figures/fig4_normalization.png" alt="Normalization"><p class="cap">Ratio normalization assumes a line through zero. The intercept CI includes zero, but only barely.</p></div>
+<div><img src="figures/fig4_normalization.png" alt="Normalization"><p class="cap">Ratio normalization assumes a line through zero. The intercept CI (−2 to 43 Nm) includes zero, so normalization is defensible here.</p></div>
 </div>
-<img src="figures/fig5_velocity_slopes.png" alt="Velocity slopes" style="width:78%">
+<img src="figures/fig5_velocity_slopes.png" alt="Velocity slopes" style="width:62%">
 
 <h2>Limitations</h2>
-<p>The sample is 100 mostly college pitchers from one facility, throwing fastballs in a lab, so results may not transfer to MLB or in-game settings. Torque is an inverse-dynamics estimate whose level scales with body mass by construction. With 100 pitchers, R² gains under about 0.05 can't be reliably separated from zero.</p>
+<p>The sample is 100 mostly college pitchers tested in one lab, throwing fastballs, so results may not transfer to MLB or in-game settings. Torque is an inverse-dynamics estimate whose level scales with body mass by construction. With 100 pitchers, the intervals for R² gains span about ±0.1, so smaller differences are not findings.</p>
 <p class="foot">Data: The OpenBiomechanics Project, Driveline Baseball (CC BY-NC-SA 4.0). This is a derived work under the same license and is not affiliated with or endorsed by Driveline.</p>
 </body></html>

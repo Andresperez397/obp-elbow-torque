@@ -113,7 +113,7 @@ def velocity_slopes():
     wb = pd.read_csv(TAB / "within_between.csv").set_index("term")
     rows = [("Between pitchers", "speed_between", BLUE), ("Within a pitcher", "speed_within", ORANGE)]
     fig, ax = plt.subplots(figsize=(7, 2.6))
-    for i, (lab, term, c) in enumerate(rows):
+    for i, (_, term, c) in enumerate(rows):
         r = wb.loc[term]
         ax.hlines(i, r["ci_low"], r["ci_high"], color=c, lw=2)
         ax.plot(r["estimate"], i, "o", ms=8, color=c)
@@ -131,7 +131,8 @@ def velocity_slopes():
 
 def main() -> None:
     FIG.mkdir(parents=True, exist_ok=True)
-    res = json.load(open(TAB / "results.json"))
+    with open(TAB / "results.json") as f:
+        res = json.load(f)
     model_ladder()
     variance_split(res)
     observed_vs_predicted()

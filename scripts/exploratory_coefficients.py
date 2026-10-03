@@ -16,7 +16,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.pipeline import make_pipeline
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from obp_evt import data, models  # noqa: E402
@@ -26,7 +25,7 @@ N_BOOT = 500
 
 def fit_coefs(df: pd.DataFrame, cols: list[str]) -> np.ndarray:
     X = df[cols].to_numpy(dtype=float)
-    prep = make_pipeline(*models._prep()).fit(X)
+    prep = models.preprocessing().fit(X)
     net = models.InnerGroupElasticNet().fit(prep.transform(X), df[data.OUTCOME].to_numpy(),
                                             df[data.GROUP].to_numpy())
     return net.model_.coef_

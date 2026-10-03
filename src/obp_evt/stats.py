@@ -75,9 +75,12 @@ def normalization_test(df: pd.DataFrame, outcome: str, group: str) -> dict:
     ci = res.conf_int()
     p["norm"] = p["evt"] / p["bwh"]
     r = float(np.corrcoef(p["norm"], p["bwh"])[0, 1])
+    z, se = np.arctanh(r), 1 / np.sqrt(len(p) - 3)  # Fisher z interval
+    r_ci = (float(np.tanh(z - 1.96 * se)), float(np.tanh(z + 1.96 * se)))
     return {"intercept_nm": res.params["Intercept"], "intercept_ci": (ci.loc["Intercept", 0],
             ci.loc["Intercept", 1]), "slope": res.params["bwh"], "r2": res.rsquared,
-            "corr_normalized_vs_bwh": r, "n_pitchers": len(p), "pitcher_table": p}
+            "corr_normalized_vs_bwh": r, "corr_ci": r_ci, "n_pitchers": len(p),
+            "pitcher_table": p}
 
 
 def cluster_bootstrap(df: pd.DataFrame, group: str, stat_fn, n_boot: int = 2000, seed: int = 0):
