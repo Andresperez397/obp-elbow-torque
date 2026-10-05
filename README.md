@@ -1,5 +1,7 @@
 # Predicting elbow varus torque in pitchers the model has never seen
 
+[![tests](https://github.com/Andresperez397/obp-elbow-torque/actions/workflows/ci.yml/badge.svg)](https://github.com/Andresperez397/obp-elbow-torque/actions/workflows/ci.yml)
+
 **What it is:** a pre-registered analysis of how much of a pitcher's peak elbow varus torque can be predicted from body size, velocity and mechanics. It also measures how badly the usual validation shortcut overstates the answer.
 
 **Data:** 411 fastballs from 100 pitchers in the [OpenBiomechanics Project](https://openbiomechanics.org) (Driveline Baseball). Torque comes from marker-based motion capture (360 Hz) with force plates (1,080 Hz), processed by inverse dynamics.
@@ -64,7 +66,7 @@ Under the pre-declared rule, a block of information counts as adding something o
 - **Grouped validation.** 10-fold cross-validation by pitcher, repeated 20 times. All preprocessing (winsorizing, imputation, scaling) and elastic-net tuning (inner grouped CV) is fit inside the training folds.
 - **Honest uncertainty.** 95% intervals come from 2,000 bootstrap resamples of pitchers (not pitches), applied to the out-of-fold predictions of the first repeat. The predictions are held fixed, so the intervals show how much the result depends on which pitchers were sampled. Repeat-to-repeat variation is small by comparison (SD of R² ≤ 0.03 across the 20 repeats).
 - **Mixed models.** A random-intercept model gives the ICC, with a parametric-bootstrap CI. A within/between decomposition separates the two velocity effects.
-- **Tests (15).** `tests/` checks:
+- **Tests (15).** CI runs the 10 that don't need the raw data on every push; the other 5 run locally after `fetch_data.py`. `tests/` checks:
   - the join keeps every pitch
   - no outcome or leakage column enters any block, and the blocks are nested
   - grouped folds never share a pitcher
