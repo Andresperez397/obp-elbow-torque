@@ -2,6 +2,14 @@
 
 [![tests](https://github.com/Andresperez397/obp-elbow-torque/actions/workflows/ci.yml/badge.svg)](https://github.com/Andresperez397/obp-elbow-torque/actions/workflows/ci.yml)
 
+## At a glance
+
+- **Question:** How much of a pitcher's peak elbow varus torque can be predicted for a pitcher the model has never seen, and how much does the usual validation shortcut overstate it?
+- **Answer:** Body size and velocity explain 45% of the variance in new pitchers; adding 42 kinematic measures reaches 63% (95% CI 52–72%). Split by pitch instead of by pitcher, boosted trees look like they explain 87%. On new pitchers they reach 51%.
+- **Why it matters:** Any model built on repeated pitches per pitcher has to be validated on whole pitchers held out, or it will overstate what it can do for the next arm.
+- **Start here:** [Two-page summary](reports/Elbow%20Torque%20Prediction%20-%20Summary.pdf) · [model ladder figure](reports/figures/fig1_model_ladder.png)
+
+
 **What it is:** a pre-registered analysis of how much of a pitcher's peak elbow varus torque can be predicted from body size, velocity and mechanics. It also measures how badly the usual validation shortcut overstates the answer.
 
 **Data:** 411 fastballs from 100 pitchers in the [OpenBiomechanics Project](https://openbiomechanics.org) (Driveline Baseball). Torque comes from marker-based motion capture (360 Hz) with force plates (1,080 Hz), processed by inverse dynamics.
