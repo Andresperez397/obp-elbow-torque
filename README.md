@@ -7,12 +7,14 @@
 - **Question:** How much of a pitcher's peak elbow varus torque can be predicted for a pitcher the model has never seen, and how much does the usual validation shortcut overstate it?
 - **Answer:** Body size and velocity explain 45% of the variance in new pitchers; adding 42 kinematic measures reaches 63% (95% CI 52–72%). Split by pitch instead of by pitcher, boosted trees look like they explain 87%. On new pitchers they reach 51%.
 - **Why it matters:** Any model built on repeated pitches per pitcher has to be validated on whole pitchers held out, or it will overstate what it can do for the next arm.
-- **Start here:** [Two-page summary](reports/Elbow%20Torque%20Prediction%20-%20Summary.pdf) · [model ladder figure](reports/figures/fig1_model_ladder.png)
+- **Start here:** [Live explorer](https://elbow-torque-explorer.streamlit.app) · [two-page summary](reports/Elbow%20Torque%20Prediction%20-%20Summary.pdf) · [model ladder figure](reports/figures/fig1_model_ladder.png)
 
 
 **What it is:** a pre-registered analysis of how much of a pitcher's peak elbow varus torque can be predicted from body size, velocity and mechanics. It also measures how badly the usual validation shortcut overstates the answer.
 
 **Data:** 411 fastballs from 100 pitchers in the [OpenBiomechanics Project](https://openbiomechanics.org) (Driveline Baseball). Torque comes from marker-based motion capture (360 Hz) with force plates (1,080 Hz), processed by inverse dynamics.
+
+**Live explorer:** [elbow-torque-explorer.streamlit.app](https://elbow-torque-explorer.streamlit.app) shows the validation trap model by model, the pitcher-versus-pitch variance split, and a body-size baseline. It reads only the committed tables.
 
 **Author:** Andres Perez, M.S. Kinesiology (Biomechanics)
 
@@ -95,6 +97,10 @@ The table below comes from 500 pitcher-bootstrap refits of the all-kinematics mo
 
 The pre-specified trees used fixed settings, while the elastic net was tuned, so I also tuned the trees (depth, learning rate, rounds, leaf size) with pitcher-grouped inner folds, on the same outer folds (5 repeats). Tuning helps the trees, from R² 0.51 to 0.55, but the elastic net still wins in all 5 repeats (0.63). See [`reports/tables/exploratory_tuned_gbm_summary.json`](reports/tables/exploratory_tuned_gbm_summary.json).
 
+## The explorer app
+
+`streamlit run app/streamlit_app.py` opens three tabs: pick any model and compare its honest R² (whole pitchers held out) with the leaky one (random pitches held out); see that 95% of torque variance is between pitchers; and try the body-size baseline (mass and height only, honest R² 0.35) with its error band. No raw data is needed.
+
 ## Repository layout
 
 ```
@@ -102,6 +108,7 @@ ANALYSIS_PLAN.md      questions, models and decision rules, frozen before modeli
 DEVIATIONS.md         every post-plan change, dated, with its reason
 src/obp_evt/          data loading and predictor blocks, models and grouped CV, mixed models and bootstrap
 scripts/              fetch_data, run_analysis, make_figures, exploratory_coefficients, exploratory_tuned_gbm
+app/                  Streamlit explorer (reads reports/tables)
 tests/                unit tests (pytest)
 reports/              tables, figures, two-page summary (HTML and PDF)
 ```
